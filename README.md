@@ -29,11 +29,12 @@ You can find a detailed [project rubric, here](https://review.udacity.com/#!/rub
 - Create a virtualenv with Python 3.7 and activate it. Refer to this link for help on specifying the Python version in the virtualenv.
 
 ```bash
-python3 -m pip install --user virtualenv
+python -m pip install --user virtualenv
 # You should have Python 3.7 available in your host.
 # Check the Python path using `which python3`
 # Use a command similar to this one:
 python3 -m virtualenv --python=<path-to-Python3.7> .devops
+python -m virtualenv --python='C:\Users\BABY\AppData\Local\Programs\Python\Python37' .devops
 source .devops/bin/activate
 ```
 
@@ -52,16 +53,74 @@ source .devops/bin/activate
 - Create Flask app in Container
 - Run via kubectl
 
----
+# MYSELF GUIDELINE
 
-# Go to the main folder
+## Setup python and pip
 
-cd DevOps_Microservices
-cd project-ml-microservice-kubernetes
+Add to PATH environment:
+C:\Users\BABY\AppData\Local\Programs\Python\Python37
+C:\Users\BABY\AppData\Local\Programs\Python\Python37\Scripts
+Then restart.
 
-# Create (and activate) a new environment
+## Use Bash Shell
 
-python -m venv ~/.devops
-source ~/.devops/Scripts/activate
+`#!/usr/bin/env bash`
 
-make install
+## Go to the main folder
+
+`cd DevOps_Microservices`
+
+## Create and activate a new environment
+
+`python -m pip install --user virtualenv`
+`python -m virtualenv --python='C:\Users\BABY\AppData\Local\Programs\Python\Python37' .devops`
+
+`python -m venv ~/.devops`
+`source ~/.devops/Scripts/activate`
+
+## `make install`
+
+Install dependencies by using makefile
+
+## `run_docker.sh`
+
+- `docker build --tag=project3 .`: Builds a Docker image in the current dictionary with name 'project3', tag 'latest'
+- `docker images list`: Lists all the Docker images available on my system.
+- `docker run -p 8000:80 project3`: Runs a Docker container with above built image 'project3'. Maps port 8000 on my host machine to port 80 inside the container. Access http://localhost:8000 via browser. It will simply display 'Sklearn Prediction Home'.
+
+## `make_prediction.sh`
+
+- `POST http://localhost:$PORT/predict`: Uses curl command to call '/predict' API. Then get the output of prediction.
+
+## `upload_docker.sh`
+
+- Run this script on time after `run_docker.sh`.
+
+- `dockerpath="khangnv09/project3"`: Assigns 'khangnv09/project3' to 'dockerpath' variable.
+- `echo "Docker ID and Image: $dockerpath"`: Prints a message indicating the Docker ID and Image that will be used in next steps.
+- `docker login`: Logs in to the Docker Hub account, enabling to push images to the Docker Hub repository.
+- `docker image tag project3 $dockerpath`: Tags the local built Docker image 'project3' with the specified 'dockerpath'.
+- `docker push $dockerpath`: Pushes the tagged Docker image to the specified Docker Hub repository.
+
+## Setup local Kubernetes
+
+- `minikube start`: Starts the local cluster.
+
+## `run_kubernetes.sh`
+
+- `dockerpath="khangnv09/project3"`: Assigns the Docker image path to the variable 'dockerpath' value is the Docker Hub repository 'khangnv2/project3'.
+- `kubectl run project3 --image=$dockerpath --port=80 --labels "app=project3"`: Uses command 'kubectl' to deploy a pod in a Kubernetes cluster with deployment name 'project3' and uses docker image 'khangnv09/project3' for the pod.
+- `kubectl get pods`: Lists the pods in the Kubernetes cluster.
+- `kubectl port-forward project3 8000:80`: Sets up port forwarding, allowing users to access the pod's port 80 on their local machine's port 8000. By this way, when they access `http://localhost:8000` in their web browser, the traffic will be forwarded to the pod's port 80, where the Flask application is running.
+
+## Makefile
+
+This file is used to automate the setup, installation of dependencies, testing, and linting processes for a project. It provides convenient commands that developers can use to perform common tasks without remembering the exact commands required.
+
+- `setup`: This target is responsible for setting up the project environment. It creates a Python virtual environment using `python3.7 -m venv ~/.devops`. This is a common practice to isolate project dependencies from the system-wide Python installation.
+- `install`: This target installs project dependencies specified in the `requirements.txt` file. It uses the `pip install` command to upgrade `pip` and install the required packages.
+- `test`: This target is intended for running tests on the project. In the example, it contains comments showing how additional tests could be added, like running tests with `pytest` or testing Jupyter notebooks using `nbval`.
+- `lint`: This target performs linting checks on the project files. It uses two linters:
+  - `hadolint` to lint the Dockerfile. `hadolint` is a linter for Dockerfiles, and it helps ensure best practices in Dockerfile creation.
+  - `pylint` to lint the Python source code. `pylint` is a widely used Python linter that checks for code quality and coding style.
+- `all`: This is the default target that developers can run with the `make` command without specifying a target explicitly. It combines the `install`, `lint`, and `test` targets. This way, you can quickly run all the necessary steps to prepare, lint, and test the project.
