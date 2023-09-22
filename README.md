@@ -80,6 +80,8 @@ Then restart.
 
 ## `make install`
 
+NOTE for local: `pip install -r requirements.txt --user`
+
 Install dependencies by using makefile
 
 ## `run_docker.sh`
@@ -124,3 +126,8 @@ This file is used to automate the setup, installation of dependencies, testing, 
   - `hadolint` to lint the Dockerfile. `hadolint` is a linter for Dockerfiles, and it helps ensure best practices in Dockerfile creation.
   - `pylint` to lint the Python source code. `pylint` is a widely used Python linter that checks for code quality and coding style.
 - `all`: This is the default target that developers can run with the `make` command without specifying a target explicitly. It combines the `install`, `lint`, and `test` targets. This way, you can quickly run all the necessary steps to prepare, lint, and test the project.
+
+## Delete Cluster
+
+- `minikube delete`: Cleans up resources and delete the kubernetes cluster.
+- `minikube stop`: Pauses the work and save the cluster state.
