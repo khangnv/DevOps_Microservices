@@ -75,10 +75,14 @@ To run this project, you will need to add the following environment variables to
     kubectl get pods
     # See services
     kubectl get services
+    # Get details of your Deployment
+    kubectl describe deployments
     # View logs of a pod (when checking incoming request)
     kubectl logs <POD_NAME>
     # Port forward to forward a port in pod to host port (format: <HOST_PORT><POD_PORT>)
     kubectl port-forward <HOST_PORT><POD_PORT>
+    # Get all
+    kubectl get all
 
 ```
 
