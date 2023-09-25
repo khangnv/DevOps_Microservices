@@ -4,7 +4,7 @@
 
 # Load Balancer Endpoint
 
-http://a7fc107d6227e435bbdcb554906f0fb6-1219523202.us-east-1.elb.amazonaws.com/
+a2746e176f2994488a3b98644d97c059-478163789.us-east-1.elb.amazonaws.com
 
 ## Environment Variables
 
@@ -54,6 +54,7 @@ To run this project, you will need to add the following environment variables to
 - Run `./scripts/create-stack.sh capstone ./cloudformation/network.yml ./cloudformation/network-params.json` to create VPC infrastructure
 - Run `./scripts/create-stack.sh capstone-eks ./cloudformation/eks-cluster.yml ./cloudformation/eks-cluster-params.json` to create EKS cluster
 - Run `./scripts/create-stack.sh capstone-nodegroup ./cloudformation/aws-eks-nodegroup.yml ./cloudformation/amazon-eks-nodegroup-params.json` to create EKS nodes group
+- `aws eks --region us-east-1 update-kubeconfig --name CapstoneEKS-PIA2IfMmVpb1`
 - Run `aws eks list-clusters --profile udacity` to see output like below
   `{
     "clusters": [
@@ -78,6 +79,7 @@ To run this project, you will need to add the following environment variables to
     kubectl logs <POD_NAME>
     # Port forward to forward a port in pod to host port (format: <HOST_PORT><POD_PORT>)
     kubectl port-forward <HOST_PORT><POD_PORT>
+
 ```
 
 ## Run Steps For Manual Deployment
