@@ -1,133 +1,90 @@
+# CircleCI Status
+
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/khangnv/DevOps_Microservices/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/khangnv/DevOps_Microservices/tree/master)
 
-## Project Overview
+# Load Balancer Endpoint
 
-In this project, you will apply the skills you have acquired in this course to operationalize a Machine Learning Microservice API.
+http://a7fc107d6227e435bbdcb554906f0fb6-1219523202.us-east-1.elb.amazonaws.com/
 
-You are given a pre-trained, `sklearn` model that has been trained to predict housing prices in Boston according to several features, such as average rooms in a home and data about highway access, teacher-to-pupil ratios, and so on. You can read more about the data, which was initially taken from Kaggle, on [the data source site](https://www.kaggle.com/c/boston-housing). This project tests your ability to operationalize a Python flask app—in a provided file, `app.py`—that serves out predictions (inference) about housing prices through API calls. This project could be extended to any pre-trained machine learning model, such as those for image recognition and data labeling.
+## Environment Variables
 
-### Project Tasks
+To run this project, you will need to add the following environment variables to your CircleCI environment variables
 
-Your project goal is to operationalize this working, machine learning microservice using [kubernetes](https://kubernetes.io/), which is an open-source system for automating the management of containerized applications. In this project you will:
+- `AWS_DEFAULT_REGION`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_DEFAULT_REGION`
+- `DOCKER_HUB_PASSWORD`
+- `DOCKER_HUB_USERNAME`
 
-- Test your project code using linting
-- Complete a Dockerfile to containerize this application
-- Deploy your containerized application using Docker and make a prediction
-- Improve the log statements in the source code for this application
-- Configure Kubernetes and create a Kubernetes cluster
-- Deploy a container using Kubernetes and make a prediction
-- Upload a complete Github repo with CircleCI to indicate that your code has been tested
+## Folder structure
 
-You can find a detailed [project rubric, here](https://review.udacity.com/#!/rubrics/2576/view).
+| File                                              | Description                                                     |
+| ------------------------------------------------- | --------------------------------------------------------------- |
+| `.circleci/config.yml`                            | CircleCI configuration                                          |
+| `cloudformation`                                  | CloudFormation yaml templates for creating infrastructure       |
+| `cloudformation/network.yml`                      | Create network VPC                                              |
+| `cloudformation/network-params.json`              | Create network VPC params                                       |
+| `cloudformation/eks-cluster.yml`                  | Create EKS cluster                                              |
+| `cloudformation/eks-cluster-params.json`          | Create EKS cluster params                                       |
+| `cloudformation/aws-eks-nodegroup.yml`            | Create EKS nodes group                                          |
+| `cloudformation/amazon-eks-nodegroup-params.json` | Create EKS nodes group params                                   |
+| `kubernetes`                                      | Kubernetes resource files                                       |
+| `kubernetes/deployment.yml`                       | Kubernetes deployment declaration                               |
+| `kubernetes/loadbalancer.yml`                     | Kubernetes loadbalancer declaration                             |
+| `kubernetes/aws-authen-cm.yml`                    | Kubernetes configmap declaration                                |
+| `app.py`                                          | main application to answer request                              |
+| `Dockerfile`                                      | Dockerfile to build image                                       |
+| `make_prediction.sh`                              | API call to make prediction                                     |
+| `Makefile`                                        | Build file of the project                                       |
+| `requirements.txt`                                | Python required libraries                                       |
+| `scripts/run-docker.sh`                           | Shell script to run docker container                            |
+| `scripts/run-kubernetes.sh`                       | Shell script to deploy docker container                         |
+| `scripts/.create-cluster.sh`                      | Shell script to manually create EKS cluster                     |
+| `scripts/create-kubeconfig.sh`                    | Shell script to create kubeconfig                               |
+| `scripts/create-stack.sh`                         | Shell script to create AWS CloudFormation stack                 |
+| `scripts/update-stack.sh`                         | Shell script to update AWS CloudFormation stack                 |
+| `scripts/delete-stack.sh`                         | Shell script to delete AWS CloudFormation stack                 |
+| `scripts/upload-docker.sh`                        | Shell script for uploading docker image to dockerhub repository |
 
-**The final implementation of the project will showcase your abilities to operationalize production microservices.**
+## Run Steps For Cloud Deployment
 
----
+- Create a DockerHub public repository
+- Run chmod 700 for each Shell scrip in `./scripts` folder
+- Run `./create-stack.sh capstone network.yml network-params.json` to create VPC infrastructure
+- Run `./create-stack.sh capstone-eks eks-cluster.yml eks-cluster-params.json` to create EKS cluster
+- Run `./create-stack.sh capstone-nodegroup aws-eks-nodegroup.yml amazon-eks-nodegroup-params.json` to create EKS nodes group
+- Run `aws eks list-clusters --profile udacity` to see output like below
+  `{
+    "clusters": [
+        "CapstoneEKS-0J5F5Y6TBD53"
+    ]
+}` to get cluster name
 
-## Setup the Environment
+- Replace cluster name to the line `123: cluster-name: CapstoneEKS-0J5F5Y6TBD53` in `./circleci/config.yml`.
+- Configure CircleCI project for the github repository
+- Done!
 
-- Create a virtualenv with Python 3.7 and activate it. Refer to this link for help on specifying the Python version in the virtualenv.
+- Some kubectl commands to check k8s resources
 
 ```bash
-python -m pip install --user virtualenv
-# You should have Python 3.7 available in your host.
-# Check the Python path using `which python3`
-# Use a command similar to this one:
-python3 -m virtualenv --python=<path-to-Python3.7> .devops
-python -m virtualenv --python='C:\Users\BABY\AppData\Local\Programs\Python\Python37' .devops
-source .devops/bin/activate
+    # See ndoes in cluster
+    kubectl get nodes
+    # See running pods
+    kubectl get pods
+    # See services
+    kubectl get services
+    # View logs of a pod (when checking incoming request)
+    kubectl logs <POD_NAME>
+    # Port forward to forward a port in pod to host port (format: <HOST_PORT><POD_PORT>)
+    kubectl port-forward <HOST_PORT><POD_PORT>
 ```
 
-- Run `make install` to install the necessary dependencies
+## Run Steps For Manual Deployment
 
-### Running `app.py`
+- Run `./scripts/create-cluster.sh`
+- Run `./scripts/create-kubeconfig.sh`
+- Run `./scripts/run-docker.sh`
+- Run `./scripts/run-kubernetes.sh`
 
-1. Standalone: `python app.py`
-2. Run in Docker: `./run_docker.sh`
-3. Run in Kubernetes: `./run_kubernetes.sh`
-
-### Kubernetes Steps
-
-- Setup and Configure Docker locally
-- Setup and Configure Kubernetes locally
-- Create Flask app in Container
-- Run via kubectl
-
-# MYSELF GUIDELINE
-
-## Setup python and pip
-
-Add to PATH environment:
-C:\Users\BABY\AppData\Local\Programs\Python\Python37
-C:\Users\BABY\AppData\Local\Programs\Python\Python37\Scripts
-Then restart.
-
-## Use Bash Shell
-
-`#!/usr/bin/env bash`
-
-## Go to the main folder
-
-`cd DevOps_Microservices`
-
-## Create and activate a new environment
-
-`python -m pip install --user virtualenv`
-`python -m virtualenv --python='C:\Users\BABY\AppData\Local\Programs\Python\Python37' .devops`
-
-`python -m venv ~/.devops`
-`source ~/.devops/Scripts/activate`
-
-## `make install`
-
-NOTE for local: `pip install -r requirements.txt --user`
-
-Install dependencies by using makefile
-
-## `run_docker.sh`
-
-- `docker build --tag=project3 .`: Builds a Docker image in the current dictionary with name 'project3', tag 'latest'
-- `docker images list`: Lists all the Docker images available on my system.
-- `docker run -p 8000:80 project3`: Runs a Docker container with above built image 'project3'. Maps port 8000 on my host machine to port 80 inside the container. Access http://localhost:8000 via browser. It will simply display 'Sklearn Prediction Home'.
-
-## `make_prediction.sh`
-
-- `POST http://localhost:$PORT/predict`: Uses curl command to call '/predict' API. Then get the output of prediction.
-
-## `upload_docker.sh`
-
-- Run this script on time after `run_docker.sh`.
-
-- `dockerpath="khangnv09/project3"`: Assigns 'khangnv09/project3' to 'dockerpath' variable.
-- `echo "Docker ID and Image: $dockerpath"`: Prints a message indicating the Docker ID and Image that will be used in next steps.
-- `docker login`: Logs in to the Docker Hub account, enabling to push images to the Docker Hub repository.
-- `docker image tag project3 $dockerpath`: Tags the local built Docker image 'project3' with the specified 'dockerpath'.
-- `docker push $dockerpath`: Pushes the tagged Docker image to the specified Docker Hub repository.
-
-## Setup local Kubernetes
-
-- `minikube start`: Starts the local cluster.
-
-## `run_kubernetes.sh`
-
-- `dockerpath="khangnv09/project3"`: Assigns the Docker image path to the variable 'dockerpath' value is the Docker Hub repository 'khangnv2/project3'.
-- `kubectl run project3 --image=$dockerpath --port=80 --labels "app=project3"`: Uses command 'kubectl' to deploy a pod in a Kubernetes cluster with deployment name 'project3' and uses docker image 'khangnv09/project3' for the pod.
-- `kubectl get pods`: Lists the pods in the Kubernetes cluster.
-- `kubectl port-forward project3 8000:80`: Sets up port forwarding, allowing users to access the pod's port 80 on their local machine's port 8000. By this way, when they access `http://localhost:8000` in their web browser, the traffic will be forwarded to the pod's port 80, where the Flask application is running.
-
-## Makefile
-
-This file is used to automate the setup, installation of dependencies, testing, and linting processes for a project. It provides convenient commands that developers can use to perform common tasks without remembering the exact commands required.
-
-- `setup`: This target is responsible for setting up the project environment. It creates a Python virtual environment using `python3.7 -m venv ~/.devops`. This is a common practice to isolate project dependencies from the system-wide Python installation.
-- `install`: This target installs project dependencies specified in the `requirements.txt` file. It uses the `pip install` command to upgrade `pip` and install the required packages.
-- `test`: This target is intended for running tests on the project. In the example, it contains comments showing how additional tests could be added, like running tests with `pytest` or testing Jupyter notebooks using `nbval`.
-- `lint`: This target performs linting checks on the project files. It uses two linters:
-  - `hadolint` to lint the Dockerfile. `hadolint` is a linter for Dockerfiles, and it helps ensure best practices in Dockerfile creation.
-  - `pylint` to lint the Python source code. `pylint` is a widely used Python linter that checks for code quality and coding style.
-- `all`: This is the default target that developers can run with the `make` command without specifying a target explicitly. It combines the `install`, `lint`, and `test` targets. This way, you can quickly run all the necessary steps to prepare, lint, and test the project.
-
-## Delete Cluster
-
-- `minikube delete`: Cleans up resources and delete the kubernetes cluster.
-- `minikube stop`: Pauses the work and save the cluster state.
+Remember to replace names of DockerHub repository & cluster name to the script file before you run.
