@@ -51,17 +51,17 @@ To run this project, you will need to add the following environment variables to
 
 - Create a DockerHub public repository
 - Run chmod 700 for each Shell scrip in `./scripts` folder
-- Run `./create-stack.sh capstone network.yml network-params.json` to create VPC infrastructure
-- Run `./create-stack.sh capstone-eks eks-cluster.yml eks-cluster-params.json` to create EKS cluster
-- Run `./create-stack.sh capstone-nodegroup aws-eks-nodegroup.yml amazon-eks-nodegroup-params.json` to create EKS nodes group
+- Run `./scripts/create-stack.sh capstone ./cloudformation/network.yml ./cloudformation/network-params.json` to create VPC infrastructure
+- Run `./scripts/create-stack.sh capstone-eks ./cloudformation/eks-cluster.yml ./cloudformation/eks-cluster-params.json` to create EKS cluster
+- Run `./scripts/create-stack.sh capstone-nodegroup ./cloudformation/aws-eks-nodegroup.yml ./cloudformation/amazon-eks-nodegroup-params.json` to create EKS nodes group
 - Run `aws eks list-clusters --profile udacity` to see output like below
   `{
     "clusters": [
-        "CapstoneEKS-0J5F5Y6TBD53"
+        "CapstoneEKS-PIA2IfMmVpb1"
     ]
 }` to get cluster name
 
-- Replace cluster name to the line `123: cluster-name: CapstoneEKS-0J5F5Y6TBD53` in `./circleci/config.yml`.
+- Replace cluster name to the line `123: cluster-name: CapstoneEKS-PIA2IfMmVpb1` in `./circleci/config.yml`.
 - Configure CircleCI project for the github repository
 - Done!
 

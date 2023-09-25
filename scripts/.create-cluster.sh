@@ -1,7 +1,7 @@
 #!/bin/bash
 
 eksctl create cluster \
---name CapstoneEKS-KhangNV09 \
+--name CapstoneEKS-PIA2IfMmVpb1 \
 --version 1.25 \
 --region us-east-1a \
 --node-type t2.small \
@@ -10,4 +10,4 @@ eksctl create cluster \
 --nodes-max 4 \
 --managed
 
-eksctl get cluster --name=CapstoneEKS-KhangNV09
+eksctl get cluster --name=CapstoneEKS-PIA2IfMmVpb1
