@@ -98,7 +98,7 @@ jobs:
       - kubernetes/create-or-update-resource:
           resource-file-path: ./kubernetes/deployment.yml
           resource-name: deployment/ml-classification
-          get-rollout-status: true
+          get-rollout-status: false
           show-kubectl-command: true
       - kubernetes/create-or-update-resource:
           resource-file-path: ./kubernetes/aws-authen-cm.yml
